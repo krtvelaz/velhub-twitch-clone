@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 
+import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -26,6 +27,7 @@ export default function RootLayout({
             attribute="class"
             forcedTheme="dark"
             storageKey="velzhub-theme">
+            <Toaster theme="light" position="bottom-center"/>
             {children}
           </ThemeProvider>
         </body>
