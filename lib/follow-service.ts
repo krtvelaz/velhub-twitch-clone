@@ -3,21 +3,28 @@ import { getSelf } from "./auth-service";
 
 
 export const getFollowedUsers = async () => {
-try {
-    const self = await getSelf();
-    const followedUsers= await db.follow.findMany({
-        where: {
-            followerId: self.id,
-        },
-        include: {
-            following: true,
-        },
-    
-    });
-    return followedUsers;
-} catch (error) {
-    return [];
-}
+    try {
+        const self = await getSelf();
+        const followedUsers = await db.follow.findMany({
+            where: {
+                followerId: self.id,
+                following: {
+                    blocking: {
+                        none: {
+                            blockedId: self.id,
+                        },
+                    },
+                }
+            },
+            include: {
+                following: true,
+            },
+
+        });
+        return followedUsers;
+    } catch (error) {
+        return [];
+    }
 }
 
 export const isFollowingUser = async (id: string) => {
@@ -32,10 +39,12 @@ export const isFollowingUser = async (id: string) => {
         if (self.id === otherUser.id) {
             return true;
         }
-        const existingFollow = await db.follow.findFirst({
+        const existingFollow = await db.follow.findUnique({
             where: {
-                followerId: self.id,
-                followingId: otherUser.id,
+                followerId_followingId: {
+                    followerId: self.id,
+                    followingId: otherUser.id,
+                },
             },
         });
         return !!existingFollow;
@@ -64,7 +73,7 @@ export const followUser = async (id: string) => {
     if (existingFollow) {
         throw new Error("Already following");
     }
-    const follow=await db.follow.create({
+    const follow = await db.follow.create({
         data: {
             followerId: self.id,
             followingId: otherUser.id,
@@ -75,7 +84,7 @@ export const followUser = async (id: string) => {
         }
     });
 
-return follow;
+    return follow;
 }
 
 export const unFollowUser = async (id: string) => {
@@ -98,7 +107,7 @@ export const unFollowUser = async (id: string) => {
     if (!existingFollow) {
         throw new Error("Not following");
     }
-    const follow=await db.follow.delete({
+    const follow = await db.follow.delete({
         where: {
             id: existingFollow.id,
         },

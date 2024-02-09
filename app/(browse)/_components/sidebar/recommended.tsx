@@ -27,7 +27,8 @@ export const Recomended = ({
                         key={user.id}
                         username={user.username}
                         imageUrl={user.imageUrl}
-                        isLive={true} />
+                        isLive={false}
+                    />
                 ))}
 
             </ul>
@@ -38,8 +39,8 @@ export const Recomended = ({
 export const RecomendedSkeleton = () => {
     return (
         <ul className="px-2">
-           {[...Array(3)].map((_, i) => 
-           <UserItemSkeleton key={i}/>)}
+            {[...Array(3)].map((_, i) =>
+                <UserItemSkeleton key={i} />)}
         </ul>
     )
 };
