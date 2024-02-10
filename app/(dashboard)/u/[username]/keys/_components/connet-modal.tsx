@@ -27,6 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createIngress } from "@/actions/ingress";
+import { toast } from "sonner";
 
 
 const RTMP = String(IngressInput.RTMP_INPUT);
@@ -40,7 +42,14 @@ export const ConnectModal = () => {
   const [ingressType, setIngressType] = useState<IngressType>(RTMP);
 
   const onSubmit = () => {
-    
+    startTransition(() => {
+      createIngress(parseInt(ingressType))
+        .then(() => {
+          toast.success("Ingress created");
+          closeRef?.current?.click();
+        })
+        .catch(() => toast.error("Something went wrong"));
+    });
   }
   return (
     <Dialog>
