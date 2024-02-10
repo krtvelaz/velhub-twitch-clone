@@ -2,8 +2,6 @@ import { db } from "@/lib/db";
 import { getSelf } from "@/lib/auth-service";
 
 export const getRecomended = async () => {
-    // await new Promise((resolve) => setTimeout(resolve, 2000));
-
     let userId;
     try {
         userId = (await getSelf()).id;
@@ -14,39 +12,70 @@ export const getRecomended = async () => {
     if (userId) {
         users = await db.user.findMany({
             where: {
-                AND: [{
-                    NOT: {
-                        id: userId
-                    }
-                }, {
-                    NOT: {
-                        followedBy: {
-                            some: {
-                                followerId: userId
-                            }
-                        }
-                    }
-                },{
-                    NOT:{
-                        blocking: {
-                            some: {
-                                blockedId: userId
-                            }
-                        }
-                    }
-                }
-            ],
+                AND: [
+                    {
+                        NOT: {
+                            id: userId,
+                        },
+                    },
+                    {
+                        NOT: {
+                            followedBy: {
+                                some: {
+                                    followerId: userId,
+                                },
+                            },
+                        },
+                    },
+                    {
+                        NOT: {
+                            blocking: {
+                                some: {
+                                    blockedId: userId,
+                                },
+                            },
+                        },
+                    },
+                ],
             },
-            orderBy: {
-                createdAt: "desc"
+            include: {
+                stream: {
+                    select: {
+                        isLive: true,
+                    },
+                },
             },
+            orderBy: [
+                {
+                    stream: {
+                        isLive: "desc",
+                    }
+                },
+                {
+                    createdAt: "desc"
+                },
+            ]
         })
     } else {
         users = await db.user.findMany({
-            orderBy: {
-                createdAt: "desc"
+            include: {
+                stream: {
+                    select: {
+                        isLive: true,
+                    },
+                },
             },
-        })
+            orderBy: [
+                {
+                    stream: {
+                        isLive: "desc",
+                    }
+                },
+                {
+                    createdAt: "desc"
+                },
+            ]
+        });
     }
     return users;
 }

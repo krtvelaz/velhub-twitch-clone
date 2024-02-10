@@ -18,7 +18,7 @@ model User {
   externalUserId String  @unique
   bio            String? @db.Text
 
-  streams Stream?
+  stream Stream?
 
   following  Follow[] @relation(name: "Following")
   followedBy Follow[] @relation(name: "FollowedBy")
