@@ -1,7 +1,7 @@
-import { db } from "@/lib/db"
-import { getSelf } from "@/lib/auth-service"
+import { db } from "@/lib/db";
+import { getSelf } from "@/lib/auth-service";
 
-export const getStreams = async () => {
+export const getSearch = async (term?: string) => {
   let userId;
 
   try {
@@ -21,17 +21,32 @@ export const getStreams = async () => {
             blocking: {
               some: {
                 blockedId: userId,
-              }
+              },
+            },
+          },
+        },
+        OR: [
+          {
+            name: {
+              contains: term,
+            },
+          },
+          {
+            user: {
+              username: {
+                contains: term,
+              },
             }
-          }
-        }
+          },
+        ],
       },
       select: {
-        id: true,
         user: true,
-        isLive: true,
+        id: true,
         name: true,
+        isLive: true,
         thumbnailUrl: true,
+        updatedAt: true,
       },
       orderBy: [
         {
@@ -39,17 +54,34 @@ export const getStreams = async () => {
         },
         {
           updatedAt: "desc",
-        }
+        },
       ],
     });
   } else {
     streams = await db.stream.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: term,
+            },
+          },
+          {
+            user: {
+              username: {
+                contains: term,
+              },
+            }
+          },
+        ],
+      },
       select: {
-        id: true,
         user: true,
-        isLive: true,
+        id: true,
         name: true,
+        isLive: true,
         thumbnailUrl: true,
+        updatedAt: true,
       },
       orderBy: [
         {
@@ -57,10 +89,10 @@ export const getStreams = async () => {
         },
         {
           updatedAt: "desc",
-        }
-      ]
+        },
+      ],
     });
-  }
+  };
 
   return streams;
 };
